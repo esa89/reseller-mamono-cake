@@ -4,17 +4,17 @@ import { useNavigate } from 'react-router-dom';  // Import useNavigate untuk nav
 // Definisikan tipe Product
 interface Product {
   name: string;
-  price: number;
+  price: string;
   image: string;
   description: string;
 }
 
 const products: Product[] = [
-  { name: "Lioud Matte Cake", price: 25000, image: "/assets/kue1.png", description: "Kue matte dengan tekstur lembut dan rasa manis yang pas." },
-  { name: "West Lime Evelyn", price: 25000, image: "/assets/kue2.png", description: "Kue lemon dengan rasa segar, dibuat dari bahan berkualitas." },
-  { name: "Laneige Cake", price: 75000, image: "/assets/kue1.png", description: "Kue spesial dengan lapisan lembut dan krim manis." },
-  { name: "Milani Smooth Finish", price: 25000, image: "/assets/kue2.png", description: "Kue dengan tekstur halus dan cita rasa premium." },
-  { name: "Lioud Matte Cake", price: 75000, image: "/assets/kue1.png", description: "Kue matte premium untuk acara spesial." },
+  { name: "Lioud Matte Cake", price: "Rp.25.000", image: "/assets/kue1.png", description: "Kue matte dengan tekstur lembut dan rasa manis yang pas." },
+  { name: "West Lime Evelyn", price: "Rp.25.000", image: "/assets/kue2.png", description: "Kue lemon dengan rasa segar, dibuat dari bahan berkualitas." },
+  { name: "Laneige Cake", price: "Rp.75.000", image: "/assets/kue1.png", description: "Kue spesial dengan lapisan lembut dan krim manis." },
+  { name: "Milani Smooth Finish", price: "Rp.25.000", image: "/assets/kue2.png", description: "Kue dengan tekstur halus dan cita rasa premium." },
+  { name: "Lioud Matte Cake", price: "Rp.75.000", image: "/assets/kue1.png", description: "Kue matte premium untuk acara spesial." },
 ];
 
 const ProductList: React.FC = () => {

@@ -5,7 +5,7 @@ import FooterMenu from '../components/FooterMenu';
 // Definisikan tipe Product di sini juga
 interface Product {
   name: string;
-  price: number;
+  price: string;
   image: string;
   description: string;
 }
@@ -13,10 +13,6 @@ interface Product {
 const CakeDetailPage: React.FC = () => {
   const location = useLocation();
   const { product } = location.state as { product: Product };  // Definisikan tipe untuk state produk
-
-
-
-
 
   return (
     <div className="min-h-screen bg-pink-200 p-4">
