@@ -11,11 +11,10 @@ const FooterMenu: React.FC = () => {
         
         {/* Tombol untuk Home */}
         <button
-          className="flex flex-col items-center focus:outline-none hover:text-pink-500 active:text-pink-700 transition duration-300"
+          className="flex items-center justify-center focus:outline-none hover:text-pink-500 active:text-pink-700 transition duration-300"
           onClick={() => navigate('/home')}
         >
-          <i className="fas fa-home text-xl"></i>
-          <p className="text-sm">Home</p>
+          <i className="fas fa-home text-2xl"></i> {/* Ganti ikon Home */}
         </button>
 
         {/* Tombol untuk Order List */}
