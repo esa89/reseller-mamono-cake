@@ -16,6 +16,10 @@ interface Order {
   product: Product;
   quantity: number;
   status: string;
+  confirmationStatus?: string;
+  approvedDate?: string;
+  deliveryDate?: string;
+  completedDate?: string;
 }
 
 const products: Product[] = [
@@ -36,12 +40,18 @@ const orders: Order[] = [
 
 const getStatusStyle = (status: string) => {
   switch (status) {
-    case "Belum Disetujui": return "bg-yellow-300 text-yellow-800";
-    case "Disetujui": return "bg-blue-300 text-blue-800";
-    case "Tidak Disetujui": return "bg-red-300 text-red-800";
-    case "Delivery": return "bg-orange-300 text-orange-800";
-    case "Pesanan Selesai": return "bg-green-300 text-green-800";
-    default: return "";
+    case "Belum Disetujui":
+      return "bg-yellow-300 text-yellow-800";
+    case "Disetujui":
+      return "bg-blue-300 text-blue-800";
+    case "Tidak Disetujui":
+      return "bg-red-300 text-red-800";
+    case "Delivery":
+      return "bg-orange-300 text-orange-800";
+    case "Pesanan Selesai":
+      return "bg-green-300 text-green-800";
+    default:
+      return "";
   }
 };
 
@@ -123,15 +133,27 @@ const TrackingFormByProduct: React.FC = () => {
       <div className="max-w-2xl mx-auto">
         {filteredOrders.length > 0 ? (
           filteredOrders.map((order, index) => (
-            <div key={index} className="mb-6 bg-white rounded-lg shadow-lg p-4 relative">
-              <div className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(order.status)}`}>
+            <div
+              key={index}
+              className="mb-6 bg-white rounded-lg shadow-lg p-4 relative"
+            >
+              <div
+                className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(
+                  order.status
+                )}`}
+              >
                 {order.status}
               </div>
-              <br></br>
-              <p className="text-lg font-semibold">Nomor Order: {order.orderNumber}</p>
+              <p className="text-lg font-semibold">
+                Nomor Order: {order.orderNumber}
+              </p>
               <p className="text-gray-600">Tanggal Pesanan: {order.orderDate}</p>
               <div className="flex items-center mt-4">
-                <img src={order.product.image} alt={order.product.name} className="w-24 h-24 object-cover rounded-lg mr-4" />
+                <img
+                  src={order.product.image}
+                  alt={order.product.name}
+                  className="w-24 h-24 object-cover rounded-lg mr-4"
+                />
                 <div>
                   <p className="font-semibold">Nama Produk: {order.product.name}</p>
                   <p>Jumlah: {order.quantity}</p>

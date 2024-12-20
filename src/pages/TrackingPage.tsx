@@ -18,12 +18,14 @@ interface Order {
   approvedDate?: string;
   deliveryDate?: string;
   completedDate?: string;
+  confirmationStatus?: string; // Added for confirmation status
+  trackingNumber?: string; // Added for tracking number
 }
 
 const TrackingPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { order } = location.state || {};
+  const { order }: { order: Order } = location.state || {}; // Use Order interface here
 
   if (!order) {
     return (
@@ -40,28 +42,26 @@ const TrackingPage: React.FC = () => {
   }
 
   const { product } = order;
-  const [activeStep, setActiveStep] = useState<number | null>(null);
+  const [activeStep, setActiveStep] = useState<number>(1); // Default to step 1
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [confirmationStatus, setConfirmationStatus] = useState(order.confirmationStatus || '');
+
   const handleConfirmation = (status: string) => {
     setConfirmationStatus(status);
-    order.confirmationStatus = status;
+    order.confirmationStatus = status; // Update confirmation status in order
     setIsDialogOpen(false);
   };
 
-  // Fungsi untuk menambahkan 1 hari ke tanggal yang diberikan
   const getNextDate = (date: string): string => {
     const nextDate = new Date(date);
     nextDate.setDate(nextDate.getDate() + 1);
     return nextDate.toISOString().split('T')[0];
   };
 
-  // Menetapkan tanggal status secara otomatis jika belum ada
   const approvedDate = order.approvedDate || getNextDate(order.orderDate);
   const deliveryDate = order.deliveryDate || getNextDate(approvedDate);
   const completedDate = order.completedDate || getNextDate(deliveryDate);
 
-  // Membuat array `steps` berdasarkan status pesanan
   const steps = [
     {
       step: 1,
@@ -77,20 +77,18 @@ const TrackingPage: React.FC = () => {
       date: approvedDate,
     },
     {
-      step: 2,
+      step: 3,
       label: 'Tidak Disetujui',
       description: `Pesanan ${product.name} Anda tidak disetujui.`,
       details: 'Hubungi penjual untuk detail lebih lanjut.',
     },
     {
-      step: 3,
+      step: 4,
       label: 'Delivery',
-      // description: `Pesanan ${product.name} akan dikirim, tolong konfimasi metoder pengirimannya`,
-      // details: 'Pesanan sedang dalam perjalanan ke alamat Anda.',
       date: deliveryDate,
     },
     {
-      step: 4,
+      step: 5,
       label: 'Pesanan Selesai',
       description: `Pesanan ${product.name} telah selesai.`,
       details: 'Terima kasih telah berbelanja dengan kami!',
@@ -98,50 +96,40 @@ const TrackingPage: React.FC = () => {
     },
   ];
 
-  // Memfilter langkah-langkah berdasarkan status pesanan menggunakan if
   const filteredSteps = steps.filter((step) => {
     if (order.status === 'Belum Disetujui') {
-      return step.step === 1 || step.step === 1;
+      return step.step === 1;
     }
-
     if (order.status === 'Disetujui') {
-      return step.step === 1 || step.label === 'Disetujui';
+      return step.step <= 2; // Include step 1 and 2
     }
-
     if (order.status === 'Tidak Disetujui') {
-      return step.step === 1 || step.label === 'Tidak Disetujui';
+      return step.step === 1 || step.step === 3; // Include step 1 and 3
     }
-
     if (order.status === 'Delivery') {
-      return step.step === 1 || step.label === 'Disetujui' || step.step === 3;
+      return step.step <= 4; // Include step 1 to 4
     }
-
     if (order.status === 'Pesanan Selesai') {
-      return step.step === 1 || step.label === 'Disetujui' || step.step === 3 || step.step === 4; // Tampilkan semua langkah
+      return step.step <= 5; // Include all steps
     }
-
-    return false; // Jika status tidak dikenal, jangan tampilkan langkah
+    return false; // If status is unknown, don't show steps
   });
 
-
   const toggleStep = (step: number) => {
-    setActiveStep((prevStep) => (prevStep === step ? null : step));
+    setActiveStep((prevStep) => (prevStep === step ? 0 : step)); // 0 indicates no step active
   };
 
   return (
     <div className="min-h-screen bg-pink-200 p-4">
       <h1 className="text-center text-2xl font-bold mb-8">Tracking Pesanan</h1>
       <div className="max-w-lg mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
-        {/* Stepper */}
         <ol className="space-y-8">
           {filteredSteps.map((step, index) => (
             <li key={index} className="relative flex-1">
-              {/* Step Header */}
               <div
                 className="flex items-start font-medium w-full cursor-pointer"
                 onClick={() => toggleStep(step.step)}
               >
-                {/* Step Number */}
                 <span
                   className={`w-8 h-8 aspect-square ${
                     activeStep >= step.step ? 'bg-indigo-600' : 'bg-gray-300'
@@ -149,7 +137,6 @@ const TrackingPage: React.FC = () => {
                 >
                   {step.step}
                 </span>
-                {/* Step Label & Description */}
                 <div>
                   <h4
                     className={`text-base ${
@@ -158,13 +145,8 @@ const TrackingPage: React.FC = () => {
                   >
                     {step.label}
                   </h4>
-                  {/* Step Content */}
                   {activeStep === step.step && (
-                    <div
-                      className={`overflow-hidden transition-all ease-in-out duration-300 ${
-                        activeStep === step.step ? 'max-h-screen' : 'max-h-0'
-                      }`}
-                    >
+                    <div className={`overflow-hidden transition-all ease-in-out duration-300 ${activeStep === step.step ? 'max-h-screen' : 'max-h-0'}`}>
                       <p className="text-sm text-gray-600">{step.description}</p>
                       <p className="text-sm font-bold text-gray-600">{step.details}</p>
 
@@ -209,43 +191,34 @@ const TrackingPage: React.FC = () => {
                           </>
                         )}
 
-                        {/* Menampilkan Konten Berdasarkan Konfirmasi */}
-                          {step.label === 'Delivery' && confirmationStatus && (
-                            <>
-                              {confirmationStatus === 'Diambil Sendiri' && (
+                        {step.label === 'Delivery' && confirmationStatus && (
+                          <>
+                            {confirmationStatus === 'Diambil Sendiri' && (
+                              <div className="mt-4">
+                                <p className="text-green-600 font-semibold">
+                                  Pesanan {product.name} akan {confirmationStatus}. Silakan ambil pesanan di toko kami.
+                                </p>
                                 <div className="mt-4">
-                                  {/* Pesan konfirmasi pengambilan sendiri */}
-                                  <p className="text-green-600 font-semibold">
-                                    Pesanan {order.product.name} akan {confirmationStatus}. Silakan ambil pesanan di toko kami.
-                                  </p>
-
-                                  {/* Embed Google Maps (tanpa API key) */}
-                                  <div className="mt-4">
-                                    <iframe
-                                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63370.06727066581!2d107.8234697!3d-7.2274336!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68bbf26ebefb5d%3A0x8bb0f02f4f5ccaf3!2sMamono%20cake%202!5e0!3m2!1sid!2sid!4v1699999999999!5m2!1sid!2sid"
-                                      width="100%"
-                                      height="300"
-                                      style={{ border: 0 }}
-                                      allowFullScreen
-                                      loading="lazy"
-                                      className="rounded-lg shadow"
-                                      title="Lokasi Mamono Cake 2"
-                                    ></iframe>
-                                  </div>
-
-                                  {/* Link alternatif ke Google Maps */}
-                                  <a 
-                                    href="https://www.google.com/maps/place/Mamono+cake+2/@-7.2274336,107.8234697,17z/data=!3m1!4b1!4m6!3m5!1s0x2e68bbf26ebefb5d:0x8bb0f02f4f5ccaf3!8m2!3d-7.2274336!4d107.8234697!16s%2Fg%2F11nx3c0rg7?entry=ttu&g_ep=EgoyMDI0MTEwNi4wIKXMDSoASAFQAw%3D%3D"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-500 underline mt-4 block"
-                                  >
-                                    Buka di Google Maps
-                                  </a>
+                                  <iframe
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63370.06727066581!2d107.8234697!3d-7.2274336!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68bbf26ebefb5d%3A0x8bb0f02f4f5ccaf3!2sMamono%20cake%202!5e0!3m2!1sid!2sid!4v1699999999999!5m2!1sid!2sid"
+                                    width="100%"
+                                    height="300"
+                                    style={{ border: 0 }}
+                                    allowFullScreen
+                                    loading="lazy"
+                                    className="rounded-lg shadow"
+                                    title="Lokasi Mamono Cake 2"
+                                  ></iframe>
                                 </div>
-                              )}
-
-                              {confirmationStatus === 'Dikirim Kurir' && (
+                                <a 
+                                  href="https://www.google.com/maps/place/Mamono+cake+2/@-7.2274336,107.8234697,12z/data=!3m1!5s0x2e68bbf26ebefb5d:0x8bb0f02f4f5ccaf3"
+                                  className="inline-block mt-2 text-blue-600 underline"
+                                >
+                                  Lihat di Google Maps
+                                </a>
+                              </div>
+                            )}
+                            {confirmationStatus === 'Dikirim Kurir' && (
                                 <div className="mt-4">
                                   <p className="text-green-600 font-semibold">
                                     Pesanan {order.product.name} sedang {confirmationStatus} dan dalam perjalanan ke alamat Anda.
@@ -255,15 +228,14 @@ const TrackingPage: React.FC = () => {
                                     Nomor Resi Pengiriman: {order.trackingNumber || 'JNE12345'}
                                   </p>
                                 </div>
-                              )}
-                            </>
-                          )}
+                            )}
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
                 </div>
               </div>
-
               {/* Garis vertikal */}
               {index < filteredSteps.length - 1 && (
                 <div
@@ -275,8 +247,10 @@ const TrackingPage: React.FC = () => {
             </li>
           ))}
         </ol>
-        {/* Dialog Konfirmasi */}
-          {isDialogOpen && (
+      </div>
+
+      {/* Dialog Konfirmasi */}
+      {isDialogOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
               <div className="relative bg-white p-8 rounded-lg">
                 {/* Tombol Close di pojok kanan atas */}
@@ -302,7 +276,6 @@ const TrackingPage: React.FC = () => {
               </div>
             </div>
           )}
-      </div>
       <FooterMenu />
     </div>
   );
